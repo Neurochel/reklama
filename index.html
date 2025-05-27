@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7CREAM - ASCII Конструктор Крему</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #0f0;
+            --secondary-color: #00ff00;
+            --accent-color: #7fff00;
+            --bg-color: #000;
+            --text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color), 0 0 30px var(--primary-color);
+        }
+        
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: var(--bg-color);
+            color: var(--primary-color);
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            cursor: crosshair;
+        }
+        
+        /* Custom Cursor */
+        body::before {
+            content: '7';
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 20px;
+            color: var(--primary-color);
+            text-shadow: var(--text-shadow);
+            animation: cursorFollow 0.1s infinite;
+        }
+        
+        /* Matrix Rain Effect */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .matrix-column {
+            position: absolute;
+            top: -100%;
+            font-size: 20px;
+            line-height: 20px;
+            color: var(--primary-color);
+            animation: matrixFall linear infinite;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+        
+        @keyframes matrixFall {
+            to {
+                transform: translateY(calc(100vh + 100%));
+            }
+        }
+        
+        /* ASCII Background Animation */
+        .ascii-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            opacity: 0.15;
+        }
+        
+        .ascii-walker {
+            position: absolute;
+            font-size: 20px;
+            color: var(--primary-color);
+            animation: walk 20s linear infinite;
+            white-space: pre;
+            filter: blur(0.5px);
+        }
+        
+        @keyframes walk {
+            0% { 
+                transform: translateX(-100px) scaleX(1); 
+            }
+            49% {
+                transform: translateX(calc(50vw - 50px)) scaleX(1);
+            }
+            50% {
+                transform: translateX(calc(50vw + 50px)) scaleX(-1);
+            }
+            100% { 
+                transform: translateX(calc(100vw + 100px)) scaleX(-1); 
+            }
+        }
+        
+        /* Glitch Effect */
+        @keyframes glitch {
+            0%, 100% {
+                text-shadow: 
+                    0.05em 0 0 rgba(255, 0, 0, .75),
+                    -0.05em -0.025em 0 rgba(0, 255, 0, .75),
+                    0.025em 0.05em 0 rgba(0, 0, 255, .75);
+            }
+            15% {
+                text-shadow: 
+                    0.05em 0 0 rgba(255, 0, 0, .75),
+                    -0.05em -0.025em 0 rgba(0, 255, 0, .75),
+                    0.025em 0.05em 0 rgba(0, 0, 255, .75);
+            }
+            16% {
+                text-shadow: 
+                    -0.05em -0.025em 0 rgba(255, 0, 0, .75),
+                    0.025em 0.025em 0 rgba(0, 255, 0, .75),
+                    -0.05em -0.05em 0 rgba(0, 0, 255, .75);
+            }
+            49% {
+                text-shadow: 
+                    -0.05em -0.025em 0 rgba(255, 0, 0, .75),
+                    0.025em 0.025em 0 rgba(0, 255, 0, .75),
+                    -0.05em -0.05em 0 rgba(0, 0, 255, .75);
+            }
+            50% {
+                text-shadow: 
+                    0.025em 0.05em 0 rgba(255, 0, 0, .75),
+                    0.05em 0 0 rgba(0, 255, 0, .75),
+                    0 -0.05em 0 rgba(0, 0, 255, .75);
+            }
+            99% {
+                text-shadow: 
+                    0.025em 0.05em 0 rgba(255, 0, 0, .75),
+                    0.05em 0 0 rgba(0, 255, 0, .75),
+                    0 -0.05em 0 rgba(0, 0, 255, .75);
+            }
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* ASCII Logo */
+        .ascii-logo {
+            text-align: center;
+            font-size: 12px;
+            line-height: 1;
+            color: var(--primary-color);
+            margin: 20px 0;
+            white-space: pre;
+            animation: glow 2s ease-in-out infinite, glitch 3s infinite alternate-reverse;
+            transform: perspective(300px) rotateX(15deg);
+        }
+        
+        @keyframes glow {
+            0%, 100% { 
+                filter: brightness(1) drop-shadow(0 0 10px var(--primary-color));
+            }
+            50% { 
+                filter: brightness(1.5) drop-shadow(0 0 30px var(--primary-color));
+            }
+        }
+        
+        /* Banner */
+        .banner {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            display: block;
+            border: 2px solid var(--primary-color);
+            box-shadow: 
+                0 0 20px var(--primary-color),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            animation: pulse 3s infinite, borderAnimation 4s linear infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(0, 255, 0, 0.1),
+                transparent
+            );
+            animation: scanline 3s linear infinite;
+        }
+        
+        @keyframes scanline {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: hue-rotate(0deg); }
+            50% { transform: scale(1.02); filter: hue-rotate(10deg); }
+        }
+        
+        @keyframes borderAnimation {
+            0%, 100% { border-color: var(--primary-color); }
+            25% { border-color: var(--accent-color); }
+            50% { border-color: #00ff7f; }
+            75% { border-color: #7fff00; }
+        }
+        
+        /* Slogan */
+        .slogan {
+            text-align: center;
+            font-size: 36px;
+            margin: 40px 0;
+            position: relative;
+            overflow: visible;
+            height: 80px;
+        }
+        
+        .slogan-text {
+            display: inline-block;
+            animation: slideIn 2s ease-out, float 3s ease-in-out infinite, glitch 5s infinite;
+            text-shadow: var(--text-shadow);
+            position: relative;
+        }
+        
+        .slogan-text::before,
+        .slogan-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .slogan-text::before {
+            animation: glitchTop 0.3s infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+            opacity: 0.8;
+        }
+        
+        .slogan-text::after {
+            animation: glitchBottom 0.3s infinite;
+            clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+            opacity: 0.8;
+        }
+        
+        @keyframes glitchTop {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-2px); }
+            40% { transform: translateX(2px); }
+            60% { transform: translateX(-1px); }
+            80% { transform: translateX(1px); }
+        }
+        
+        @keyframes glitchBottom {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(2px); }
+            40% { transform: translateX(-2px); }
+            60% { transform: translateX(1px); }
+            80% { transform: translateX(-1px); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-100px) rotateX(90deg); opacity: 0; }
+            to { transform: translateY(0) rotateX(0); opacity: 1; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateZ(0deg); }
+            25% { transform: translateY(-10px) rotateZ(1deg); }
+            75% { transform: translateY(5px) rotateZ(-1deg); }
+        }
+        
+        /* Constructor */
+        .constructor {
+            background: rgba(0, 255, 0, 0.02);
+            border: 2px solid var(--primary-color);
+            padding: 30px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        
+        .constructor::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: conic-gradient(
+                from 0deg at 50% 50%,
+                transparent,
+                var(--primary-color),
+                transparent,
+                var(--primary-color)
+            );
+            animation: constructorRotate 10s linear infinite;
+            opacity: 0.1;
+        }
+        
+        @keyframes constructorRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--primary-color);
+            position: relative;
+            transition: all 0.3s;
+            transform-style: preserve-3d;
+            backdrop-filter: blur(10px);
+        }
+        
+        .section::before {
+            content: '777777777777777777777777777777777777777777777777';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            opacity: 0.02;
+            z-index: 0;
+            letter-spacing: 10px;
+        }
+        
+        .section:hover {
+            transform: translateZ(20px) rotateX(2deg);
+            box-shadow: 
+                0 20px 40px rgba(0, 255, 0, 0.3),
+                0 0 60px var(--primary-color),
+                inset 0 0 30px rgba(0, 255, 0, 0.1);
+            border-color: var(--accent-color);
+        }
+        
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section-title i {
+            font-size: 30px;
+            animation: rotate 4s linear infinite, colorShift 2s infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            to { transform: rotate(360deg) scale(1); }
+        }
+        
+        @keyframes colorShift {
+            0%, 100% { color: var(--primary-color); }
+            33% { color: var(--accent-color); }
+            66% { color: #00ff7f; }
+        }
+        
+        .ingredient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ingredient {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--primary-color);
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        
+        .ingredient::before {
+            content: '7777777';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            opacity: 0.1;
+            z-index: 0;
+            transition: all 0.3s;
+        }
+        
+        .ingredient::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 255, 0, 0.4),
+                transparent
+            );
+            transition: left 0.5s;
+        }
+        
+        .ingredient:hover::after {
+            left: 100%;
+        }
+        
+        .ingredient:hover {
+            background: rgba(0, 255, 0, 0.1);
+            transform: translateY(-5px) rotateX(5deg) scale(1.05);
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 0, 0.5),
+                0 0 50px var(--primary-color),
+                inset 0 0 20px rgba(0, 255, 0, 0.2);
+            border-color: var(--accent-color);
+        }
+        
+        .ingredient:hover::before {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.2;
+        }
+        
+        .ingredient.selected {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: var(--accent-color);
+            box-shadow: 
+                0 0 30px var(--primary-color),
+                inset 0 0 20px rgba(0, 255, 0, 0.3);
+            animation: selectedPulse 1s infinite;
+        }
+        
+        @keyframes selectedPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 0 30px var(--primary-color),
+                    inset 0 0 20px rgba(0, 255, 0, 0.3);
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 
+                    0 0 50px var(--primary-color),
+                    inset 0 0 30px rgba(0, 255, 0, 0.5);
+            }
+        }
+        
+        .ingredient-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ingredient-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px currentColor;
+        }
+        
+        .ingredient-price {
+            color: var(--accent-color);
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .ingredient-icon {
+            float: right;
+            font-size: 24px;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+        
+        .ingredient:hover .ingredient-icon {
+            opacity: 0.8;
+            transform: rotate(180deg) scale(1.2);
+        }
+        
+        .ingredient.selected .ingredient-icon {
+            opacity: 1;
+            animation: bounce 0.5s, spin 2s linear infinite;
+            color: var(--accent-color);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(180deg); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Price Display */
+        .price-display {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            font-size: 24px;
+            box-shadow: 
+                0 0 40px var(--primary-color),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            z-index: 100;
+            animation: priceFloat 2s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+        }
+        
+        .price-display::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(
+                45deg,
+                var(--primary-color),
+                var(--accent-color),
+                var(--primary-color)
+            );
+            z-index: -1;
+            animation: borderGradient 3s linear infinite;
+            filter: blur(2px);
+        }
+        
+        @keyframes borderGradient {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes priceFloat {
+            0%, 100% { 
+                transform: translateY(0) rotateX(0deg); 
+            }
+            50% { 
+                transform: translateY(-10px) rotateX(5deg); 
+            }
+        }
+        
+        .total-price {
+            font-size: 36px;
+            color: var(--accent-color);
+            text-shadow: var(--text-shadow);
+            font-weight: bold;
+            animation: priceGlow 1s infinite;
+        }
+        
+        @keyframes priceGlow {
+            0%, 100% { 
+                filter: brightness(1);
+                transform: scale(1);
+            }
+            50% { 
+                filter: brightness(1.2);
+                transform: scale(1.05);
+            }
+        }
+        
+        /* Order Button */
+        .order-btn {
+            display: block;
+            width: 400px;
+            margin: 40px auto;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-size: 28px;
+            font-family: inherit;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .order-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(
+                circle,
+                var(--accent-color) 0%,
+                transparent 70%
+            );
+            transform: translate(-50%, -50%);
+            transition: all 0.5s;
+        }
+        
+        .order-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(0, 255, 0, 0.1) 50%,
+                transparent 70%
+            );
+            animation: btnScan 3s linear infinite;
+        }
+        
+        @keyframes btnScan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .order-btn:hover::before {
+            width: 600px;
+            height: 600px;
+        }
+        
+        .order-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 
+                0 10px 40px rgba(0, 255, 0, 0.5),
+                0 0 60px var(--primary-color),
+                inset 0 0 30px rgba(0, 255, 0, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            animation: btnPulse 0.5s infinite;
+        }
+        
+        @keyframes btnPulse {
+            0%, 100% { 
+                border-width: 2px;
+            }
+            50% { 
+                border-width: 4px;
+            }
+        }
+        
+        /* Order Modal */
+        .order-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid var(--primary-color);
+            padding: 50px;
+            text-align: center;
+            animation: modalAppear 0.5s;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 100px var(--primary-color),
+                inset 0 0 50px rgba(0, 255, 0, 0.2);
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at center,
+                transparent,
+                rgba(0, 255, 0, 0.1)
+            );
+            animation: modalRotate 10s linear infinite;
+        }
+        
+        @keyframes modalRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes modalAppear {
+            from {
+                transform: scale(0) rotate(720deg);
+                opacity: 0;
+                filter: blur(20px);
+            }
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+        
+        .success-title {
+            color: var(--accent-color);
+            font-size: 42px;
+            margin-bottom: 30px;
+            text-shadow: var(--text-shadow);
+            animation: successGlow 1s infinite, glitch 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes successGlow {
+            0%, 100% { 
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: scale(1.05);
+                filter: brightness(1.3);
+            }
+        }
+        
+        .success-ascii {
+            font-size: 14px;
+            line-height: 1;
+            color: var(--primary-color);
+            margin: 20px 0;
+            white-space: pre;
+            animation: successPulse 1s infinite, asciiRotate 10s linear infinite;
+            text-shadow: 0 0 20px currentColor;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes successPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes asciiRotate {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+        }
+        
+        .modal-text {
+            margin: 20px 0;
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .close-modal {
+            margin-top: 30px;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 18px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .close-modal:hover {
+            background: rgba(0, 255, 0, 0.1);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px var(--primary-color);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .loading::after {
+            content: '7';
+            animation: loadingAnim 1s infinite;
+        }
+        
+        @keyframes loadingAnim {
+            0% { content: '7'; }
+            25% { content: '77'; }
+            50% { content: '777'; }
+            75% { content: '7777'; }
+            100% { content: '77777'; }
+        }
+        
+        /* Particles */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 999;
+        }
+        
+        .particle.active {
+            animation: particleAnim 1s ease-out;
+        }
+        
+        @keyframes particleAnim {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y)) scale(1);
+            }
+        }
+        
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .slogan {
+                font-size: 24px;
+            }
+            
+            .ingredient-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .order-btn {
+                width: 90%;
+                font-size: 20px;
+            }
+            
+            .price-display {
+                bottom: 10px;
+                right: 10px;
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .total-price {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain Effect -->
+    <div class="matrix-rain" id="matrixRain"></div>
+    
+    <!-- ASCII Background -->
+    <div class="ascii-bg" id="asciiBg"></div>
+    
+    <div class="container">
+        <!-- ASCII Logo -->
+        <div class="ascii-logo">
+777777777  77777777  7777777  77777777  777     777
+       77  77        77   77  77        7777   7777
+      77   77        77777    77777     77 77 77 77
+     77    77        77   77  77        77  777  77
+    77     77777777  77    77 77777777  77   7   77
+        </div>
+        
+        <!-- Banner -->
+        <img src="cool.png" alt="7CREAM Banner" class="banner">
+        
+        <!-- Slogan -->
+        <div class="slogan">
+            <div class="slogan-text" data-text="Формула № YOU: інгредієнти обираєш ти">
+                Формула № YOU: інгредієнти обираєш ти
+            </div>
+        </div>
+        
+        <!-- Constructor -->
+        <div class="constructor">
+            <!-- Base Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-flask"></i>
+                    База крему
+                </h2>
+                <div class="ingredient-grid">
+                    <div class="ingredient" data-price="500" data-name="Гіалуронова база">
+                        <div class="ingredient-content">
+                            <i class="fas fa-tint ingredient-icon"></i>
+                            <div class="ingredient-name">Гіалуронова база</div>
+                            <div class="ingredient-price">₴500</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="400" data-name="Гліцеринова база">
+                        <div class="ingredient-content">
+                            <i class="fas fa-droplet ingredient-icon"></i>
+                            <div class="ingredient-name">Гліцеринова база</div>
+                            <div class="ingredient-price">₴400</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="700" data-name="Олійна база">
+                        <div class="ingredient-content">
+                            <i class="fas fa-oil-can ingredient-icon"></i>
+                            <div class="ingredient-name">Олійна база</div>
+                            <div class="ingredient-price">₴700</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="600" data-name="Водна база">
+                        <div class="ingredient-content">
+                            <i class="fas fa-water ingredient-icon"></i>
+                            <div class="ingredient-name">Водна база</div>
+                            <div class="ingredient-price">₴600</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Ingredients -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-atom"></i>
+                    Активні компоненти
+                </h2>
+                <div class="ingredient-grid">
+                    <div class="ingredient" data-price="800" data-name="Ретинол">
+                        <div class="ingredient-content">
+                            <i class="fas fa-star ingredient-icon"></i>
+                            <div class="ingredient-name">Ретинол 1%</div>
+                            <div class="ingredient-price">₴800</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="900" data-name="Вітамін C">
+                        <div class="ingredient-content">
+                            <i class="fas fa-lemon ingredient-icon"></i>
+                            <div class="ingredient-name">Вітамін C 15%</div>
+                            <div class="ingredient-price">₴900</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="700" data-name="Ніацинамід">
+                        <div class="ingredient-content">
+                            <i class="fas fa-shield-alt ingredient-icon"></i>
+                            <div class="ingredient-name">Ніацинамід 10%</div>
+                            <div class="ingredient-price">₴700</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="1000" data-name="Пептиди">
+                        <div class="ingredient-content">
+                            <i class="fas fa-dna ingredient-icon"></i>
+                            <div class="ingredient-name">Пептидний комплекс</div>
+                            <div class="ingredient-price">₴1000</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="600" data-name="AHA кислоти">
+                        <div class="ingredient-content">
+                            <i class="fas fa-circle-notch ingredient-icon"></i>
+                            <div class="ingredient-name">AHA кислоти 5%</div>
+                            <div class="ingredient-price">₴600</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="650" data-name="BHA кислоти">
+                        <div class="ingredient-content">
+                            <i class="fas fa-dot-circle ingredient-icon"></i>
+                            <div class="ingredient-name">BHA кислоти 2%</div>
+                            <div class="ingredient-price">₴650</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Oils -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-spa"></i>
+                    Олії та екстракти
+                </h2>
+                <div class="ingredient-grid">
+                    <div class="ingredient" data-price="400" data-name="Олія жожоба">
+                        <div class="ingredient-content">
+                            <i class="fas fa-leaf ingredient-icon"></i>
+                            <div class="ingredient-name">Олія жожоба</div>
+                            <div class="ingredient-price">₴400</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="500" data-name="Олія аргани">
+                        <div class="ingredient-content">
+                            <i class="fas fa-tree ingredient-icon"></i>
+                            <div class="ingredient-name">Олія аргани</div>
+                            <div class="ingredient-price">₴500</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="350" data-name="Екстракт алое">
+                        <div class="ingredient-content">
+                            <i class="fas fa-seedling ingredient-icon"></i>
+                            <div class="ingredient-name">Екстракт алое</div>
+                            <div class="ingredient-price">₴350</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="450" data-name="Екстракт центели">
+                        <div class="ingredient-content">
+                            <i class="fas fa-clover ingredient-icon"></i>
+                            <div class="ingredient-name">Екстракт центели</div>
+                            <div class="ingredient-price">₴450</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="600" data-name="Олія троянди">
+                        <div class="ingredient-content">
+                            <i class="fas fa-fan ingredient-icon"></i>
+                            <div class="ingredient-name">Олія троянди</div>
+                            <div class="ingredient-price">₴600</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="380" data-name="Екстракт зеленого чаю">
+                        <div class="ingredient-content">
+                            <i class="fas fa-mug-hot ingredient-icon"></i>
+                            <div class="ingredient-name">Екстракт зеленого чаю</div>
+                            <div class="ingredient-price">₴380</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Textures -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-hand-sparkles"></i>
+                    Текстура та консистенція
+                </h2>
+                <div class="ingredient-grid">
+                    <div class="ingredient" data-price="200" data-name="Легкий гель">
+                        <div class="ingredient-content">
+                            <i class="fas fa-feather ingredient-icon"></i>
+                            <div class="ingredient-name">Легкий гель</div>
+                            <div class="ingredient-price">₴200</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="250" data-name="Щільний крем">
+                        <div class="ingredient-content">
+                            <i class="fas fa-cube ingredient-icon"></i>
+                            <div class="ingredient-name">Щільний крем</div>
+                            <div class="ingredient-price">₴250</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="300" data-name="Флюїд">
+                        <div class="ingredient-content">
+                            <i class="fas fa-wind ingredient-icon"></i>
+                            <div class="ingredient-name">Флюїд</div>
+                            <div class="ingredient-price">₴300</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="280" data-name="Мус">
+                        <div class="ingredient-content">
+                            <i class="fas fa-cloud ingredient-icon"></i>
+                            <div class="ingredient-name">Мус</div>
+                            <div class="ingredient-price">₴280</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fragrance -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-spray-can"></i>
+                    Аромати
+                </h2>
+                <div class="ingredient-grid">
+                    <div class="ingredient" data-price="150" data-name="Без запаху">
+                        <div class="ingredient-content">
+                            <i class="fas fa-ban ingredient-icon"></i>
+                            <div class="ingredient-name">Без запаху</div>
+                            <div class="ingredient-price">₴150</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="300" data-name="Лаванда">
+                        <div class="ingredient-content">
+                            <i class="fas fa-moon ingredient-icon"></i>
+                            <div class="ingredient-name">Лаванда</div>
+                            <div class="ingredient-price">₴300</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="350" data-name="Цитрус">
+                        <div class="ingredient-content">
+                            <i class="fas fa-sun ingredient-icon"></i>
+                            <div class="ingredient-name">Цитрус</div>
+                            <div class="ingredient-price">₴350</div>
+                        </div>
+                    </div>
+                    <div class="ingredient" data-price="400" data-name="Троянда">
+                        <div class="ingredient-content">
+                            <i class="fas fa-heart ingredient-icon"></i>
+                            <div class="ingredient-name">Троянда</div>
+                            <div class="ingredient-price">₴400</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Button -->
+            <button class="order-btn" onclick="showOrder()">
+                СТВОРИТИ ФОРМУЛУ<span class="loading"></span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Price Display -->
+    <div class="price-display">
+        <div>Ваша формула:</div>
+        <div class="total-price">₴<span id="totalPrice">0</span></div>
+    </div>
+    
+    <!-- Order Modal -->
+    <div class="order-modal" id="orderModal">
+        <div class="modal-content">
+            <h2 class="success-title">ЗАМОВЛЕННЯ ПРИЙНЯТО!</h2>
+            <div class="success-ascii">
+    777777
+   77   77
+  77     77
+  77     77
+  77     77
+   77   77
+    77777
+      77
+      77
+            </div>
+            <p class="modal-text">Ваша унікальна формула створена!</p>
+            <p class="modal-text">Склад: <span id="orderComposition"></span></p>
+            <p class="modal-text" style="font-size: 24px; color: var(--accent-color); margin-top: 20px;">
+                Разом: ₴<span id="orderTotal"></span>
+            </p>
+            <button class="close-modal" onclick="closeOrder()">ЗАКРИТИ</button>
+        </div>
+    </div>
+    
+    <script>
+        // Matrix Rain Effect
+        function createMatrixRain() {
+            const matrixContainer = document.getElementById('matrixRain');
+            const columns = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = (5 + Math.random() * 10) + 's';
+                column.style.animationDelay = Math.random() * 5 + 's';
+                
+                let text = '';
+                for (let j = 0; j < 50; j++) {
+                    text += Math.random() > 0.5 ? '7' : String.fromCharCode(0x30A0 + Math.random() * 96);
+                    text += '\n';
+                }
+                column.textContent = text;
+                matrixContainer.appendChild(column);
+            }
+        }
+        
+        createMatrixRain();
+        
+        // ASCII Background Animation
+        function createAsciiWalkers() {
+            const bg = document.getElementById('asciiBg');
+            const walkers = [
+                `  o
+ /|\\
+ / \\`,
+                ` \\o/
+  |
+ / \\`,
+                `  o
+ <|>
+ / \\`,
+                ` _o_
+  |
+ / \\`,
+                `  o
+ /|\\
+  ^`
+            ];
+            
+            setInterval(() => {
+                const walker = document.createElement('div');
+                walker.className = 'ascii-walker';
+                walker.textContent = walkers[Math.floor(Math.random() * walkers.length)];
+                walker.style.top = Math.random() * window.innerHeight + 'px';
+                walker.style.animationDuration = (15 + Math.random() * 10) + 's';
+                walker.style.fontSize = (15 + Math.random() * 10) + 'px';
+                walker.style.opacity = 0.1 + Math.random() * 0.2;
+                bg.appendChild(walker);
+                
+                setTimeout(() => walker.remove(), 25000);
+            }, 2000);
+        }
+        
+        createAsciiWalkers();
+        
+        // Cursor Effect
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.createElement('div');
+            cursor.className = 'particle';
+            cursor.innerHTML = '7';
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursor.style.color = '#0f0';
+            cursor.style.fontSize = '20px';
+            cursor.style.setProperty('--x', (Math.random() - 0.5) * 100 + 'px');
+            cursor.style.setProperty('--y', (Math.random() - 0.5) * 100 + 'px');
+            document.body.appendChild(cursor);
+            
+            cursor.classList.add('active');
+            setTimeout(() => cursor.remove(), 1000);
+        });
+        
+        // Price Calculation
+        let totalPrice = 0;
+        let selectedIngredients = [];
+        
+        document.querySelectorAll('.ingredient').forEach(item => {
+            item.addEventListener('click', function() {
+                const price = parseInt(this.dataset.price);
+                const name = this.dataset.name;
+                
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    totalPrice -= price;
+                    selectedIngredients = selectedIngredients.filter(i => i !== name);
+                } else {
+                    this.classList.add('selected');
+                    totalPrice += price;
+                    selectedIngredients.push(name);
+                }
+                
+                document.getElementById('totalPrice').textContent = totalPrice;
+                
+                // Animate price change
+                const priceDisplay = document.querySelector('.price-display');
+                priceDisplay.style.animation = 'none';
+                setTimeout(() => {
+                    priceDisplay.style.animation = 'priceFloat 2s ease-in-out infinite';
+                }, 10);
+                
+                // Create particles on click
+                const rect = this.getBoundingClientRect();
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        particle.innerHTML = '7';
+                        particle.style.left = (rect.left + rect.width / 2) + 'px';
+                        particle.style.top = (rect.top + rect.height / 2) + 'px';
+                        particle.style.color = '#0f0';
+                        particle.style.fontSize = Math.random() * 20 + 10 + 'px';
+                        particle.style.setProperty('--x', (Math.random() - 0.5) * 200 + 'px');
+                        particle.style.setProperty('--y', (Math.random() - 0.5) * 200 + 'px');
+                        document.body.appendChild(particle);
+                        
+                        particle.classList.add('active');
+                        setTimeout(() => particle.remove(), 1000);
+                    }, i * 50);
+                }
+            });
+        });
+        
+        // Order Functions
+        function showOrder() {
+            if (selectedIngredients.length === 0) {
+                alert('Оберіть хоча б один інгредієнт!');
+                return;
+            }
+            
+            document.getElementById('orderComposition').textContent = selectedIngredients.join(', ');
+            document.getElementById('orderTotal').textContent = totalPrice;
+            document.getElementById('orderModal').style.display = 'flex';
+            
+            // Create explosion effect
+            const modal = document.querySelector('.modal-content');
+            const rect = modal.getBoundingClientRect();
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.innerHTML = '7';
+                    particle.style.left = (rect.left + rect.width / 2) + 'px';
+                    particle.style.top = (rect.top + rect.height / 2) + 'px';
+                    particle.style.color = '#0f0';
+                    particle.style.fontSize = Math.random() * 30 + 20 + 'px';
+                    particle.style.setProperty('--x', (Math.random() - 0.5) * 400 + 'px');
+                    particle.style.setProperty('--y', (Math.random() - 0.5) * 400 + 'px');
+                    document.body.appendChild(particle);
+                    
+                    particle.classList.add('active');
+                    setTimeout(() => particle.remove(), 1000);
+                }, i * 30);
+            }
+        }
+        
+        function closeOrder() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+        
+        // Parallax effect on sections
+        document.addEventListener('mousemove', (e) => {
+            const sections = document.querySelectorAll('.section');
+            const x = (e.clientX - window.innerWidth / 2) / window.innerWidth;
+            const y = (e.clientY - window.innerHeight / 2) / window.innerHeight;
+            
+            sections.forEach((section, index) => {
+                const speed = (index + 1) * 0.5;
+                section.style.transform = `translateX(${x * speed}px) translateY(${y * speed}px)`;
+            });
+        });
+        
+        // Glitch effect on logo hover
+        const logo = document.querySelector('.ascii-logo');
+        logo.addEventListener('mouseenter', () => {
+            logo.style.animation = 'glow 0.1s ease-in-out infinite, glitch 0.2s infinite';
+        });
+        logo.addEventListener('mouseleave', () => {
+            logo.style.animation = 'glow 2s ease-in-out infinite, glitch 3s infinite alternate-reverse';
+        });
+    </script>
+</body>
+</html>
